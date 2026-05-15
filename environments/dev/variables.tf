@@ -153,28 +153,6 @@ variable "stockholm_tgw_asn" {
 }
 
 # -----------------------------------------------------------------------------
-# EC2 Test Instance Configuration
-# -----------------------------------------------------------------------------
-
-variable "instance_type" {
-  description = "EC2 instance type for test instances"
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "create_test_instances" {
-  description = "Whether to create test EC2 instances"
-  type        = bool
-  default     = true
-}
-
-variable "key_name" {
-  description = "Name of the SSH key pair for EC2 instances"
-  type        = string
-  default     = null
-}
-
-# -----------------------------------------------------------------------------
 # Feature Flags
 # -----------------------------------------------------------------------------
 

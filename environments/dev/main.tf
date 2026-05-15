@@ -5,7 +5,6 @@
 # - VPCs in Paris (eu-west-3) and Frankfurt (eu-central-1)
 # - Transit Gateways in both regions
 # - TGW Inter-region peering
-# - Test EC2 instances for connectivity verification
 # =============================================================================
 
 # =============================================================================
@@ -127,52 +126,3 @@ module "tgw_peering" {
   depends_on = [module.tgw_paris, module.tgw_frankfurt]
 }
 
-# =============================================================================
-# Test EC2 Instance - Paris Region
-# =============================================================================
-
-module "test_instance_paris" {
-  source = "../../modules/ec2-test"
-  count  = var.create_test_instances ? 1 : 0
-
-  providers = {
-    aws = aws.paris
-  }
-
-  vpc_id        = module.vpc_paris.vpc_id
-  vpc_cidr      = var.paris_vpc_cidr
-  subnet_id     = module.vpc_paris.private_subnet_ids[0]
-  peer_vpc_cidr = var.frankfurt_vpc_cidr
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  region_name   = "paris"
-  project_name  = var.project_name
-  environment   = var.environment
-
-  depends_on = [module.tgw_peering]
-}
-
-# =============================================================================
-# Test EC2 Instance - Frankfurt Region
-# =============================================================================
-
-module "test_instance_frankfurt" {
-  source = "../../modules/ec2-test"
-  count  = var.create_test_instances ? 1 : 0
-
-  providers = {
-    aws = aws.frankfurt
-  }
-
-  vpc_id        = module.vpc_frankfurt.vpc_id
-  vpc_cidr      = var.frankfurt_vpc_cidr
-  subnet_id     = module.vpc_frankfurt.private_subnet_ids[0]
-  peer_vpc_cidr = var.paris_vpc_cidr
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  region_name   = "frankfurt"
-  project_name  = var.project_name
-  environment   = var.environment
-
-  depends_on = [module.tgw_peering]
-}
