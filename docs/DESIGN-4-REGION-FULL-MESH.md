@@ -72,6 +72,42 @@ Each region will have:
 - 1 Internet Gateway
 - Route tables with routes to all other 3 VPCs
 
+### Internet Gateway (IGW)
+- **Purpose:** Provides internet connectivity for resources in public subnets
+- **Use Case:** Allows public-facing resources (load balancers, bastion hosts) to communicate with the internet
+- **Attached to:** VPC level, routes traffic from public subnets to the internet
+
+### NAT Gateway
+- **Purpose:** Enables private subnet resources to access the internet for outbound traffic only
+- **Use Case:** Software updates, API calls, downloading packages for EC2 instances in private subnets
+- **Location:** Deployed in public subnet, uses Elastic IP
+- **Security:** Allows outbound internet access while preventing inbound connections from the internet
+
+### Subnet Types
+
+| Subnet Type | CIDR Example | Purpose | Internet Access |
+|-------------|--------------|---------|-----------------|
+| **Public Subnet** | 10.x.1.0/24, 10.x.2.0/24 | Load balancers, bastion hosts, NAT Gateway | Direct via IGW |
+| **Private Subnet** | 10.x.11.0/24, 10.x.12.0/24 | Application servers, databases, EC2 instances | Outbound only via NAT |
+| **TGW Subnet** | 10.x.21.0/24, 10.x.22.0/24 | Transit Gateway attachment ENIs | No direct internet |
+
+### Subnet Details
+
+**Public Subnets (10.x.1.0/24, 10.x.2.0/24):**
+- Route to 0.0.0.0/0 via Internet Gateway
+- Auto-assign public IP enabled
+- Used for: NAT Gateway, Application Load Balancers, Bastion hosts
+
+**Private Subnets (10.x.11.0/24, 10.x.12.0/24):**
+- Route to 0.0.0.0/0 via NAT Gateway
+- Route to other VPCs via Transit Gateway
+- Used for: Application servers, databases, backend services
+
+**TGW Subnets (10.x.21.0/24, 10.x.22.0/24):**
+- Dedicated subnets for Transit Gateway attachment ENIs
+- Isolated from application workloads
+- Used for: TGW VPC attachment only (AWS best practice)
+
 **Test EC2 Instances:**
 - Paris: Yes (for connectivity testing)
 - Frankfurt: Yes (for connectivity testing)
