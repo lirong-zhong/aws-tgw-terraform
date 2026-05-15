@@ -26,6 +26,11 @@ output "private_dns" {
   value       = aws_instance.test.private_dns
 }
 
+output "public_ip" {
+  description = "Public IP address of the test instance"
+  value       = aws_instance.test.public_ip
+}
+
 # -----------------------------------------------------------------------------
 # Security Group Outputs
 # -----------------------------------------------------------------------------

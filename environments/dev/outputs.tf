@@ -112,8 +112,13 @@ output "paris_test_instance_id" {
 }
 
 output "paris_test_instance_private_ip" {
-  description = "Test instance private IP in Paris region"
+  description = "Private IP of Paris test instance"
   value       = var.create_test_instances ? module.test_instance_paris[0].private_ip : null
+}
+
+output "paris_test_instance_public_ip" {
+  description = "Public IP of Paris test instance"
+  value       = var.create_test_instances ? module.test_instance_paris[0].public_ip : null
 }
 
 output "paris_ssm_session_command" {
@@ -133,6 +138,11 @@ output "frankfurt_test_instance_id" {
 output "frankfurt_test_instance_private_ip" {
   description = "Test instance private IP in Frankfurt region"
   value       = var.create_test_instances ? module.test_instance_frankfurt[0].private_ip : null
+}
+
+output "frankfurt_test_instance_public_ip" {
+  description = "Public IP of Frankfurt test instance"
+  value       = var.create_test_instances ? module.test_instance_frankfurt[0].public_ip : null
 }
 
 output "frankfurt_ssm_session_command" {
