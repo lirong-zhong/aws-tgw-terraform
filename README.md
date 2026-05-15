@@ -1,55 +1,47 @@
 # AWS Transit Gateway Multi-Region Infrastructure
 
-This Terraform project creates a multi-region AWS infrastructure with Transit Gateway (TGW) inter-region peering between **eu-west-3 (Paris)** and **eu-central-1 (Frankfurt)**.
+This Terraform project creates a **4-region full mesh** AWS infrastructure with Transit Gateway (TGW) inter-region peering.
 
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           AWS Account: 1358-0892-5467                            │
-├───────────────────────────────────┬─────────────────────────────────────────────┤
-│       eu-west-3 (Paris)           │           eu-central-1 (Frankfurt)          │
-├───────────────────────────────────┼─────────────────────────────────────────────┤
-│                                   │                                             │
-│  ┌─────────────────────────────┐  │  ┌─────────────────────────────┐            │
-│  │     VPC: 10.1.0.0/16        │  │  │     VPC: 10.2.0.0/16        │            │
-│  │                             │  │  │                             │            │
-│  │  ┌───────────────────────┐  │  │  │  ┌───────────────────────┐  │            │
-│  │  │ Public Subnets (2 AZ) │  │  │  │  │ Public Subnets (2 AZ) │  │            │
-│  │  │ 10.1.0.0/20           │  │  │  │  │ 10.2.0.0/20           │  │            │
-│  │  └───────────────────────┘  │  │  │  └───────────────────────┘  │            │
-│  │                             │  │  │                             │            │
-│  │  ┌───────────────────────┐  │  │  │  ┌───────────────────────┐  │            │
-│  │  │ Private Subnets (2 AZ)│  │  │  │  │ Private Subnets (2 AZ)│  │            │
-│  │  │ 10.1.16.0/20          │  │  │  │  │ 10.2.16.0/20          │  │            │
-│  │  │ [Test EC2 Instance]   │  │  │  │  │ [Test EC2 Instance]   │  │            │
-│  │  └───────────────────────┘  │  │  │  └───────────────────────┘  │            │
-│  │                             │  │  │                             │            │
-│  │  ┌───────────────────────┐  │  │  │  ┌───────────────────────┐  │            │
-│  │  │ TGW Subnets (2 AZ)    │  │  │  │  │ TGW Subnets (2 AZ)    │  │            │
-│  │  │ 10.1.32.0/20          │  │  │  │  │ 10.2.32.0/20          │  │            │
-│  │  └───────────────────────┘  │  │  │  └───────────────────────┘  │            │
-│  │                             │  │  │                             │            │
-│  └──────────┬──────────────────┘  │  └──────────┬──────────────────┘            │
-│             │                     │             │                               │
-│  ┌──────────▼──────────────────┐  │  ┌──────────▼──────────────────┐            │
-│  │   Transit Gateway           │◄─┼──►   Transit Gateway           │            │
-│  │   ASN: 64512                │  │  │   ASN: 64513                │            │
-│  └─────────────────────────────┘  │  └─────────────────────────────┘            │
-│                                   │                                             │
-│              TGW Inter-Region Peering Connection                                │
-│                                   │                                             │
-└───────────────────────────────────┴─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              AWS Account: 1358-0892-5467                             │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                      │
+│    ┌─────────────────┐                              ┌─────────────────┐             │
+│    │  Paris (eu-west-3)  │◄────────────────────────►│  Frankfurt (eu-central-1)  │  │
+│    │  VPC: 10.1.0.0/16   │                          │  VPC: 10.2.0.0/16           │  │
+│    │  TGW ASN: 64512     │                          │  TGW ASN: 64513             │  │
+│    └────────┬────────────┘                          └────────┬──────────────────┘   │
+│             │                                                │                       │
+│             │              Full Mesh Peering                 │                       │
+│             │              (6 Connections)                   │                       │
+│             │                                                │                       │
+│    ┌────────▼────────────┐                          ┌────────▼──────────────────┐   │
+│    │  Ireland (eu-west-1)   │◄────────────────────►│  Stockholm (eu-north-1)    │   │
+│    │  VPC: 10.3.0.0/16      │                       │  VPC: 10.4.0.0/16          │   │
+│    │  TGW ASN: 64514        │                       │  TGW ASN: 64515            │   │
+│    └────────────────────────┘                       └────────────────────────────┘   │
+│                                                                                      │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+Full Mesh Peering Connections:
+  1. Paris     ◄──► Frankfurt
+  2. Paris     ◄──► Ireland
+  3. Paris     ◄──► Stockholm
+  4. Frankfurt ◄──► Ireland
+  5. Frankfurt ◄──► Stockholm
+  6. Ireland   ◄──► Stockholm
 ```
 
 ## Features
 
+- **4-Region Full Mesh**: Paris, Frankfurt, Ireland, Stockholm with 6 peering connections
 - **Multi-AZ Deployment**: Resources spread across 2 Availability Zones per region
 - **Transit Gateway Peering**: Cross-region connectivity via TGW peering
 - **Dedicated TGW Subnets**: Isolated subnets for TGW attachments (AWS best practice)
 - **VPC Flow Logs**: Network traffic monitoring enabled
-- **SSM Session Manager**: Secure instance access without SSH keys
-- **IMDSv2 Required**: Enhanced instance metadata security
 - **Modular Design**: Reusable Terraform modules
 
 ## Project Structure
@@ -60,42 +52,40 @@ AWS-TGW-Terraform/
 ├── .gitignore                         # Git ignore patterns
 ├── .terraform-version                 # Terraform version constraint
 │
+├── docs/                              # Documentation
+│   ├── ARCHITECTURE.md                # Detailed architecture
+│   └── DESIGN-4-REGION-FULL-MESH.md   # 4-region design document
+│
 ├── modules/                           # Reusable Terraform modules
 │   ├── vpc/                           # VPC module
 │   │   ├── main.tf                    # VPC, subnets, NAT, IGW
 │   │   ├── variables.tf               # Input variables
-│   │   └── outputs.tf                 # Output values
+│   │   ├── outputs.tf                 # Output values
+│   │   └── versions.tf                # Version constraints
 │   │
 │   ├── tgw/                           # Transit Gateway module
 │   │   ├── main.tf                    # TGW, attachments, route tables
 │   │   ├── variables.tf               # Input variables
-│   │   └── outputs.tf                 # Output values
+│   │   ├── outputs.tf                 # Output values
+│   │   └── versions.tf                # Version constraints
 │   │
-│   ├── tgw-peering/                   # TGW Peering module
-│   │   ├── main.tf                    # Peering attachment, routes
-│   │   ├── variables.tf               # Input variables
-│   │   └── outputs.tf                 # Output values
-│   │
-│   └── ec2-test/                      # Test EC2 instance module
-│       ├── main.tf                    # EC2, security groups, IAM
+│   └── tgw-peering/                   # TGW Peering module
+│       ├── main.tf                    # Peering attachment, routes
 │       ├── variables.tf               # Input variables
-│       └── outputs.tf                 # Output values
+│       ├── outputs.tf                 # Output values
+│       └── versions.tf                # Version constraints
 │
-├── environments/                      # Environment configurations
-│   └── dev/                           # Development environment
-│       ├── versions.tf                # Terraform/provider versions
-│       ├── providers.tf               # AWS provider configuration
-│       ├── variables.tf               # Environment variables
-│       ├── locals.tf                  # Local values
-│       ├── main.tf                    # Main configuration
-│       ├── outputs.tf                 # Environment outputs
-│       ├── backend.tf                 # State backend (S3)
-│       └── terraform.tfvars.example   # Example variables file
-│
-└── scripts/                           # Helper scripts
-    ├── deploy.sh                      # Deployment script
-    ├── cleanup.sh                     # Cleanup script
-    └── test-connectivity.sh           # Connectivity test script
+└── environments/                      # Environment configurations
+    └── dev/                           # Development environment
+        ├── main.tf                    # All 4 regions + 6 peering connections
+        ├── outputs.tf                 # Environment outputs
+        ├── variables.tf               # Environment variables
+        ├── providers.tf               # AWS provider configuration
+        ├── versions.tf                # Terraform/provider versions
+        ├── locals.tf                  # Local values
+        ├── backend.tf                 # State backend (S3)
+        ├── terraform.tfvars           # Variable values (gitignored)
+        └── terraform.tfvars.example   # Example variables file
 ```
 
 ## Prerequisites
@@ -105,7 +95,6 @@ AWS-TGW-Terraform/
 - **AWS Account** with permissions for:
   - VPC, Subnets, Route Tables
   - Transit Gateway
-  - EC2, IAM
   - CloudWatch Logs
 
 ## Quick Start
@@ -113,7 +102,6 @@ AWS-TGW-Terraform/
 ### 1. Clone and Configure
 
 ```bash
-# Navigate to the project
 cd AWS-TGW-Terraform
 
 # Copy the example variables file
@@ -138,29 +126,10 @@ export AWS_PROFILE=your-profile
 ### 3. Deploy Infrastructure
 
 ```bash
-# Using the deploy script
-./scripts/deploy.sh
-
-# Or manually
 cd environments/dev
 terraform init
 terraform plan
 terraform apply
-```
-
-### 4. Test Connectivity
-
-After deployment, test the TGW peering connectivity:
-
-```bash
-# Run the automated test script
-./scripts/test-connectivity.sh
-
-# Or manually connect via SSM
-aws ssm start-session --target <paris-instance-id> --region eu-west-3
-
-# From the Paris instance, ping Frankfurt
-ping <frankfurt-private-ip>
 ```
 
 ## Configuration
@@ -174,18 +143,20 @@ aws_account_id = "135808925467"
 # Regions
 paris_region     = "eu-west-3"
 frankfurt_region = "eu-central-1"
+ireland_region   = "eu-west-1"
+stockholm_region = "eu-north-1"
 
 # Network CIDRs (must not overlap)
 paris_vpc_cidr     = "10.1.0.0/16"
 frankfurt_vpc_cidr = "10.2.0.0/16"
+ireland_vpc_cidr   = "10.3.0.0/16"
+stockholm_vpc_cidr = "10.4.0.0/16"
 
 # Transit Gateway ASNs (must be unique)
 paris_tgw_asn     = 64512
 frankfurt_tgw_asn = 64513
-
-# Test instances
-create_test_instances = true
-instance_type         = "t3.micro"
+ireland_tgw_asn   = 64514
+stockholm_tgw_asn = 64515
 
 # Features
 enable_flow_logs   = true
@@ -200,50 +171,20 @@ After deployment, Terraform provides useful outputs:
 terraform output
 
 # Key outputs:
-# - paris_vpc_id / frankfurt_vpc_id
-# - paris_tgw_id / frankfurt_tgw_id
-# - tgw_peering_attachment_id
-# - paris_test_instance_private_ip / frankfurt_test_instance_private_ip
-# - connectivity_test_instructions
+# - paris_vpc_id / frankfurt_vpc_id / ireland_vpc_id / stockholm_vpc_id
+# - paris_tgw_id / frankfurt_tgw_id / ireland_tgw_id / stockholm_tgw_id
+# - peering_paris_frankfurt_id
+# - peering_paris_ireland_id
+# - peering_paris_stockholm_id
+# - peering_frankfurt_ireland_id
+# - peering_frankfurt_stockholm_id
+# - peering_ireland_stockholm_id
+# - infrastructure_summary
 ```
-
-## Testing Connectivity
-
-### Automated Test
-
-```bash
-./scripts/test-connectivity.sh
-```
-
-### Manual Test
-
-1. **Connect to Paris instance:**
-   ```bash
-   aws ssm start-session --target <instance-id> --region eu-west-3
-   ```
-
-2. **Ping Frankfurt instance:**
-   ```bash
-   ping 10.2.x.x  # Frankfurt private IP
-   ```
-
-3. **Run traceroute:**
-   ```bash
-   traceroute 10.2.x.x
-   ```
-
-4. **Use the built-in test script:**
-   ```bash
-   ./test-connectivity.sh 10.2.x.x
-   ```
 
 ## Cleanup
 
 ```bash
-# Using the cleanup script
-./scripts/cleanup.sh
-
-# Or manually
 cd environments/dev
 terraform destroy
 ```
@@ -254,29 +195,25 @@ This infrastructure incurs AWS charges for:
 
 | Resource | Approximate Cost |
 |----------|------------------|
-| Transit Gateway (per region) | ~$36/month |
-| TGW Peering Attachment | ~$36/month |
+| Transit Gateway (per region × 4) | ~$144/month |
+| TGW Peering Attachment (× 6) | ~$216/month |
 | TGW Data Processing | $0.02/GB |
-| NAT Gateway (per AZ) | ~$32/month + data |
-| EC2 t3.micro | ~$8/month |
+| NAT Gateway (per region) | ~$128/month |
 | VPC Flow Logs | Variable |
 
-**Estimated Total (dev):** ~$150-200/month
+**Estimated Total (dev):** ~$500-600/month
 
 ### Cost Optimization Tips
 
 - Use `single_nat_gateway = true` for dev/test
-- Set `create_test_instances = false` when not testing
 - Disable flow logs if not needed: `enable_flow_logs = false`
+- Consider reducing to 2 regions for testing
 
 ## Security Best Practices Implemented
 
-- ✅ IMDSv2 required for EC2 instances
-- ✅ SSM Session Manager (no SSH keys)
-- ✅ Encrypted EBS volumes
 - ✅ VPC Flow Logs enabled
-- ✅ Least privilege security groups
 - ✅ Dedicated TGW subnets
+- ✅ Least privilege security groups
 - ✅ No public IPs on private instances
 
 ## Troubleshooting
@@ -293,29 +230,23 @@ This infrastructure incurs AWS charges for:
    aws ec2 describe-transit-gateway-route-tables --region eu-west-3
    ```
 
-### SSM Session Manager Not Connecting
+### VPC Routes Missing
 
-1. Check instance IAM role has `AmazonSSMManagedInstanceCore` policy
-2. Verify SSM agent is running:
+1. Check VPC route tables:
    ```bash
-   aws ssm describe-instance-information --region eu-west-3
+   aws ec2 describe-route-tables --region eu-west-3
    ```
-3. Ensure NAT Gateway is working (for private subnets)
 
-### Ping Not Working
+2. Verify TGW attachment is active:
+   ```bash
+   aws ec2 describe-transit-gateway-vpc-attachments --region eu-west-3
+   ```
 
-1. Check security groups allow ICMP
-2. Verify VPC route tables have TGW routes
-3. Check TGW route tables have peering routes
+## Documentation
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `terraform fmt` and `terraform validate`
-5. Submit a pull request
+- [Architecture Details](docs/ARCHITECTURE.md)
+- [4-Region Full Mesh Design](docs/DESIGN-4-REGION-FULL-MESH.md)
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License
