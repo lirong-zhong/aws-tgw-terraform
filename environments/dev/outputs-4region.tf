@@ -70,32 +70,8 @@ output "peering_ireland_stockholm_id" {
 }
 
 # -----------------------------------------------------------------------------
-# Test Instance Outputs - Ireland
+# Note: Test instances are only created in Paris and Frankfurt regions
 # -----------------------------------------------------------------------------
-
-output "ireland_test_instance_id" {
-  description = "Test instance ID in Ireland region"
-  value       = var.create_test_instances ? module.test_instance_ireland[0].instance_id : null
-}
-
-output "ireland_test_instance_private_ip" {
-  description = "Test instance private IP in Ireland region"
-  value       = var.create_test_instances ? module.test_instance_ireland[0].private_ip : null
-}
-
-# -----------------------------------------------------------------------------
-# Test Instance Outputs - stockholm
-# -----------------------------------------------------------------------------
-
-output "stockholm_test_instance_id" {
-  description = "Test instance ID in stockholm region"
-  value       = var.create_test_instances ? module.test_instance_stockholm[0].instance_id : null
-}
-
-output "stockholm_test_instance_private_ip" {
-  description = "Test instance private IP in stockholm region"
-  value       = var.create_test_instances ? module.test_instance_stockholm[0].private_ip : null
-}
 
 # -----------------------------------------------------------------------------
 # Full Mesh Summary

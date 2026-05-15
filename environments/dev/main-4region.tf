@@ -255,51 +255,6 @@ module "tgw_peering_ireland_stockholm" {
 }
 
 # =============================================================================
-# Test EC2 Instance - Ireland Region
+# Note: Test EC2 instances for Ireland and Stockholm are not created
+# Only Paris and Frankfurt have test instances for connectivity testing
 # =============================================================================
-
-module "test_instance_ireland" {
-  source = "../../modules/ec2-test"
-  count  = var.create_test_instances ? 1 : 0
-
-  providers = {
-    aws = aws.ireland
-  }
-
-  vpc_id        = module.vpc_ireland.vpc_id
-  vpc_cidr      = var.ireland_vpc_cidr
-  subnet_id     = module.vpc_ireland.private_subnet_ids[0]
-  peer_vpc_cidr = var.paris_vpc_cidr
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  region_name   = "ireland"
-  project_name  = var.project_name
-  environment   = var.environment
-
-  depends_on = [module.tgw_peering_paris_ireland]
-}
-
-# =============================================================================
-# Test EC2 Instance - stockholm Region
-# =============================================================================
-
-module "test_instance_stockholm" {
-  source = "../../modules/ec2-test"
-  count  = var.create_test_instances ? 1 : 0
-
-  providers = {
-    aws = aws.stockholm
-  }
-
-  vpc_id        = module.vpc_stockholm.vpc_id
-  vpc_cidr      = var.stockholm_vpc_cidr
-  subnet_id     = module.vpc_stockholm.private_subnet_ids[0]
-  peer_vpc_cidr = var.paris_vpc_cidr
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  region_name   = "stockholm"
-  project_name  = var.project_name
-  environment   = var.environment
-
-  depends_on = [module.tgw_peering_paris_stockholm]
-}
