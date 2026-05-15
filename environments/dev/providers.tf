@@ -29,3 +29,27 @@ provider "aws" {
     tags = local.common_tags
   }
 }
+
+# -----------------------------------------------------------------------------
+# Provider for Ireland region (eu-west-1)
+# -----------------------------------------------------------------------------
+provider "aws" {
+  alias  = "ireland"
+  region = var.ireland_region
+
+  default_tags {
+    tags = local.common_tags
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Provider for London region (eu-west-2)
+# -----------------------------------------------------------------------------
+provider "aws" {
+  alias  = "london"
+  region = var.london_region
+
+  default_tags {
+    tags = local.common_tags
+  }
+}
