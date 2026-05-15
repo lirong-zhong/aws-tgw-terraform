@@ -22,22 +22,22 @@ output "ireland_tgw_id" {
 }
 
 # -----------------------------------------------------------------------------
-# VPC Outputs - London
+# VPC Outputs - stockholm
 # -----------------------------------------------------------------------------
 
-output "london_vpc_id" {
-  description = "VPC ID in London region"
-  value       = module.vpc_london.vpc_id
+output "stockholm_vpc_id" {
+  description = "VPC ID in stockholm region"
+  value       = module.vpc_stockholm.vpc_id
 }
 
-output "london_vpc_cidr" {
-  description = "VPC CIDR in London region"
-  value       = module.vpc_london.vpc_cidr
+output "stockholm_vpc_cidr" {
+  description = "VPC CIDR in stockholm region"
+  value       = module.vpc_stockholm.vpc_cidr
 }
 
-output "london_tgw_id" {
-  description = "Transit Gateway ID in London region"
-  value       = module.tgw_london.tgw_id
+output "stockholm_tgw_id" {
+  description = "Transit Gateway ID in stockholm region"
+  value       = module.tgw_stockholm.tgw_id
 }
 
 # -----------------------------------------------------------------------------
@@ -49,9 +49,9 @@ output "peering_paris_ireland_id" {
   value       = module.tgw_peering_paris_ireland.peering_attachment_id
 }
 
-output "peering_paris_london_id" {
-  description = "TGW peering attachment ID: Paris <-> London"
-  value       = module.tgw_peering_paris_london.peering_attachment_id
+output "peering_paris_stockholm_id" {
+  description = "TGW peering attachment ID: Paris <-> stockholm"
+  value       = module.tgw_peering_paris_stockholm.peering_attachment_id
 }
 
 output "peering_frankfurt_ireland_id" {
@@ -59,14 +59,14 @@ output "peering_frankfurt_ireland_id" {
   value       = module.tgw_peering_frankfurt_ireland.peering_attachment_id
 }
 
-output "peering_frankfurt_london_id" {
-  description = "TGW peering attachment ID: Frankfurt <-> London"
-  value       = module.tgw_peering_frankfurt_london.peering_attachment_id
+output "peering_frankfurt_stockholm_id" {
+  description = "TGW peering attachment ID: Frankfurt <-> stockholm"
+  value       = module.tgw_peering_frankfurt_stockholm.peering_attachment_id
 }
 
-output "peering_ireland_london_id" {
-  description = "TGW peering attachment ID: Ireland <-> London"
-  value       = module.tgw_peering_ireland_london.peering_attachment_id
+output "peering_ireland_stockholm_id" {
+  description = "TGW peering attachment ID: Ireland <-> stockholm"
+  value       = module.tgw_peering_ireland_stockholm.peering_attachment_id
 }
 
 # -----------------------------------------------------------------------------
@@ -84,17 +84,17 @@ output "ireland_test_instance_private_ip" {
 }
 
 # -----------------------------------------------------------------------------
-# Test Instance Outputs - London
+# Test Instance Outputs - stockholm
 # -----------------------------------------------------------------------------
 
-output "london_test_instance_id" {
-  description = "Test instance ID in London region"
-  value       = var.create_test_instances ? module.test_instance_london[0].instance_id : null
+output "stockholm_test_instance_id" {
+  description = "Test instance ID in stockholm region"
+  value       = var.create_test_instances ? module.test_instance_stockholm[0].instance_id : null
 }
 
-output "london_test_instance_private_ip" {
-  description = "Test instance private IP in London region"
-  value       = var.create_test_instances ? module.test_instance_london[0].private_ip : null
+output "stockholm_test_instance_private_ip" {
+  description = "Test instance private IP in stockholm region"
+  value       = var.create_test_instances ? module.test_instance_stockholm[0].private_ip : null
 }
 
 # -----------------------------------------------------------------------------
@@ -108,15 +108,15 @@ output "full_mesh_summary" {
       paris     = { vpc_cidr = var.paris_vpc_cidr, tgw_id = module.tgw_paris.tgw_id }
       frankfurt = { vpc_cidr = var.frankfurt_vpc_cidr, tgw_id = module.tgw_frankfurt.tgw_id }
       ireland   = { vpc_cidr = var.ireland_vpc_cidr, tgw_id = module.tgw_ireland.tgw_id }
-      london    = { vpc_cidr = var.london_vpc_cidr, tgw_id = module.tgw_london.tgw_id }
+      stockholm    = { vpc_cidr = var.stockholm_vpc_cidr, tgw_id = module.tgw_stockholm.tgw_id }
     }
     peering_connections = {
       "1_paris_frankfurt" = module.tgw_peering.peering_attachment_id
       "2_paris_ireland"   = module.tgw_peering_paris_ireland.peering_attachment_id
-      "3_paris_london"    = module.tgw_peering_paris_london.peering_attachment_id
+      "3_paris_stockholm"    = module.tgw_peering_paris_stockholm.peering_attachment_id
       "4_frankfurt_ireland" = module.tgw_peering_frankfurt_ireland.peering_attachment_id
-      "5_frankfurt_london"  = module.tgw_peering_frankfurt_london.peering_attachment_id
-      "6_ireland_london"    = module.tgw_peering_ireland_london.peering_attachment_id
+      "5_frankfurt_stockholm"  = module.tgw_peering_frankfurt_stockholm.peering_attachment_id
+      "6_ireland_stockholm"    = module.tgw_peering_ireland_stockholm.peering_attachment_id
     }
   }
 }

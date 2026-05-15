@@ -1,7 +1,7 @@
 # =============================================================================
 # 4-Region Full Mesh TGW Configuration
 # =============================================================================
-# This adds Ireland and London regions with full mesh peering (6 connections)
+# This adds Ireland and stockholm regions with full mesh peering (6 connections)
 # =============================================================================
 
 # =============================================================================
@@ -24,18 +24,18 @@ module "vpc_ireland" {
 }
 
 # =============================================================================
-# VPC Module - London Region
+# VPC Module - stockholm Region
 # =============================================================================
 
-module "vpc_london" {
+module "vpc_stockholm" {
   source = "../../modules/vpc"
 
   providers = {
-    aws = aws.london
+    aws = aws.stockholm
   }
 
-  vpc_cidr           = var.london_vpc_cidr
-  region_name        = "london"
+  vpc_cidr           = var.stockholm_vpc_cidr
+  region_name        = "stockholm"
   project_name       = var.project_name
   environment        = var.environment
   single_nat_gateway = var.single_nat_gateway
@@ -64,24 +64,24 @@ module "tgw_ireland" {
 }
 
 # =============================================================================
-# Transit Gateway Module - London Region
+# Transit Gateway Module - stockholm Region
 # =============================================================================
 
-module "tgw_london" {
+module "tgw_stockholm" {
   source = "../../modules/tgw"
 
   providers = {
-    aws = aws.london
+    aws = aws.stockholm
   }
 
-  vpc_id          = module.vpc_london.vpc_id
-  tgw_subnet_ids  = module.vpc_london.tgw_subnet_ids
-  amazon_side_asn = var.london_tgw_asn
-  region_name     = "london"
+  vpc_id          = module.vpc_stockholm.vpc_id
+  tgw_subnet_ids  = module.vpc_stockholm.tgw_subnet_ids
+  amazon_side_asn = var.stockholm_tgw_asn
+  region_name     = "stockholm"
   project_name    = var.project_name
   environment     = var.environment
 
-  depends_on = [module.vpc_london]
+  depends_on = [module.vpc_stockholm]
 }
 
 # =============================================================================
@@ -119,15 +119,15 @@ module "tgw_peering_paris_ireland" {
 }
 
 # =============================================================================
-# TGW Peering #3: Paris <-> London
+# TGW Peering #3: Paris <-> stockholm
 # =============================================================================
 
-module "tgw_peering_paris_london" {
+module "tgw_peering_paris_stockholm" {
   source = "../../modules/tgw-peering"
 
   providers = {
     aws.requester = aws.paris
-    aws.accepter  = aws.london
+    aws.accepter  = aws.stockholm
   }
 
   requester_tgw_id                  = module.tgw_paris.tgw_id
@@ -137,19 +137,19 @@ module "tgw_peering_paris_london" {
   requester_public_route_table_ids  = [module.vpc_paris.public_route_table_id]
   requester_private_route_table_ids = module.vpc_paris.private_route_table_ids
 
-  accepter_tgw_id                  = module.tgw_london.tgw_id
-  accepter_tgw_route_table_id      = module.tgw_london.tgw_route_table_id
-  accepter_vpc_cidr                = var.london_vpc_cidr
-  accepter_region                  = var.london_region
-  accepter_region_name             = "london"
-  accepter_public_route_table_ids  = [module.vpc_london.public_route_table_id]
-  accepter_private_route_table_ids = module.vpc_london.private_route_table_ids
+  accepter_tgw_id                  = module.tgw_stockholm.tgw_id
+  accepter_tgw_route_table_id      = module.tgw_stockholm.tgw_route_table_id
+  accepter_vpc_cidr                = var.stockholm_vpc_cidr
+  accepter_region                  = var.stockholm_region
+  accepter_region_name             = "stockholm"
+  accepter_public_route_table_ids  = [module.vpc_stockholm.public_route_table_id]
+  accepter_private_route_table_ids = module.vpc_stockholm.private_route_table_ids
 
   peer_account_id = var.aws_account_id
   project_name    = var.project_name
   environment     = var.environment
 
-  depends_on = [module.tgw_paris, module.tgw_london]
+  depends_on = [module.tgw_paris, module.tgw_stockholm]
 }
 
 # =============================================================================
@@ -187,15 +187,15 @@ module "tgw_peering_frankfurt_ireland" {
 }
 
 # =============================================================================
-# TGW Peering #5: Frankfurt <-> London
+# TGW Peering #5: Frankfurt <-> stockholm
 # =============================================================================
 
-module "tgw_peering_frankfurt_london" {
+module "tgw_peering_frankfurt_stockholm" {
   source = "../../modules/tgw-peering"
 
   providers = {
     aws.requester = aws.frankfurt
-    aws.accepter  = aws.london
+    aws.accepter  = aws.stockholm
   }
 
   requester_tgw_id                  = module.tgw_frankfurt.tgw_id
@@ -205,31 +205,31 @@ module "tgw_peering_frankfurt_london" {
   requester_public_route_table_ids  = [module.vpc_frankfurt.public_route_table_id]
   requester_private_route_table_ids = module.vpc_frankfurt.private_route_table_ids
 
-  accepter_tgw_id                  = module.tgw_london.tgw_id
-  accepter_tgw_route_table_id      = module.tgw_london.tgw_route_table_id
-  accepter_vpc_cidr                = var.london_vpc_cidr
-  accepter_region                  = var.london_region
-  accepter_region_name             = "london"
-  accepter_public_route_table_ids  = [module.vpc_london.public_route_table_id]
-  accepter_private_route_table_ids = module.vpc_london.private_route_table_ids
+  accepter_tgw_id                  = module.tgw_stockholm.tgw_id
+  accepter_tgw_route_table_id      = module.tgw_stockholm.tgw_route_table_id
+  accepter_vpc_cidr                = var.stockholm_vpc_cidr
+  accepter_region                  = var.stockholm_region
+  accepter_region_name             = "stockholm"
+  accepter_public_route_table_ids  = [module.vpc_stockholm.public_route_table_id]
+  accepter_private_route_table_ids = module.vpc_stockholm.private_route_table_ids
 
   peer_account_id = var.aws_account_id
   project_name    = var.project_name
   environment     = var.environment
 
-  depends_on = [module.tgw_frankfurt, module.tgw_london]
+  depends_on = [module.tgw_frankfurt, module.tgw_stockholm]
 }
 
 # =============================================================================
-# TGW Peering #6: Ireland <-> London
+# TGW Peering #6: Ireland <-> stockholm
 # =============================================================================
 
-module "tgw_peering_ireland_london" {
+module "tgw_peering_ireland_stockholm" {
   source = "../../modules/tgw-peering"
 
   providers = {
     aws.requester = aws.ireland
-    aws.accepter  = aws.london
+    aws.accepter  = aws.stockholm
   }
 
   requester_tgw_id                  = module.tgw_ireland.tgw_id
@@ -239,19 +239,19 @@ module "tgw_peering_ireland_london" {
   requester_public_route_table_ids  = [module.vpc_ireland.public_route_table_id]
   requester_private_route_table_ids = module.vpc_ireland.private_route_table_ids
 
-  accepter_tgw_id                  = module.tgw_london.tgw_id
-  accepter_tgw_route_table_id      = module.tgw_london.tgw_route_table_id
-  accepter_vpc_cidr                = var.london_vpc_cidr
-  accepter_region                  = var.london_region
-  accepter_region_name             = "london"
-  accepter_public_route_table_ids  = [module.vpc_london.public_route_table_id]
-  accepter_private_route_table_ids = module.vpc_london.private_route_table_ids
+  accepter_tgw_id                  = module.tgw_stockholm.tgw_id
+  accepter_tgw_route_table_id      = module.tgw_stockholm.tgw_route_table_id
+  accepter_vpc_cidr                = var.stockholm_vpc_cidr
+  accepter_region                  = var.stockholm_region
+  accepter_region_name             = "stockholm"
+  accepter_public_route_table_ids  = [module.vpc_stockholm.public_route_table_id]
+  accepter_private_route_table_ids = module.vpc_stockholm.private_route_table_ids
 
   peer_account_id = var.aws_account_id
   project_name    = var.project_name
   environment     = var.environment
 
-  depends_on = [module.tgw_ireland, module.tgw_london]
+  depends_on = [module.tgw_ireland, module.tgw_stockholm]
 }
 
 # =============================================================================
@@ -280,26 +280,26 @@ module "test_instance_ireland" {
 }
 
 # =============================================================================
-# Test EC2 Instance - London Region
+# Test EC2 Instance - stockholm Region
 # =============================================================================
 
-module "test_instance_london" {
+module "test_instance_stockholm" {
   source = "../../modules/ec2-test"
   count  = var.create_test_instances ? 1 : 0
 
   providers = {
-    aws = aws.london
+    aws = aws.stockholm
   }
 
-  vpc_id        = module.vpc_london.vpc_id
-  vpc_cidr      = var.london_vpc_cidr
-  subnet_id     = module.vpc_london.private_subnet_ids[0]
+  vpc_id        = module.vpc_stockholm.vpc_id
+  vpc_cidr      = var.stockholm_vpc_cidr
+  subnet_id     = module.vpc_stockholm.private_subnet_ids[0]
   peer_vpc_cidr = var.paris_vpc_cidr
   instance_type = var.instance_type
   key_name      = var.key_name
-  region_name   = "london"
+  region_name   = "stockholm"
   project_name  = var.project_name
   environment   = var.environment
 
-  depends_on = [module.tgw_peering_paris_london]
+  depends_on = [module.tgw_peering_paris_stockholm]
 }

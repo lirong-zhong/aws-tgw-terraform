@@ -38,10 +38,10 @@ variable "ireland_region" {
   default     = "eu-west-1"
 }
 
-variable "london_region" {
-  description = "AWS Region for London"
+variable "stockholm_region" {
+  description = "AWS Region for Stockholm"
   type        = string
-  default     = "eu-west-2"
+  default     = "eu-north-1"
 }
 
 # -----------------------------------------------------------------------------
@@ -90,17 +90,17 @@ variable "ireland_vpc_cidr" {
 }
 
 # -----------------------------------------------------------------------------
-# Network Configuration - London
+# Network Configuration - Stockholm
 # -----------------------------------------------------------------------------
 
-variable "london_vpc_cidr" {
-  description = "CIDR block for VPC in London region"
+variable "stockholm_vpc_cidr" {
+  description = "CIDR block for VPC in Stockholm region"
   type        = string
   default     = "10.4.0.0/16"
 
   validation {
-    condition     = can(cidrhost(var.london_vpc_cidr, 0))
-    error_message = "The london_vpc_cidr must be a valid IPv4 CIDR block."
+    condition     = can(cidrhost(var.stockholm_vpc_cidr, 0))
+    error_message = "The stockholm_vpc_cidr must be a valid IPv4 CIDR block."
   }
 }
 
@@ -141,14 +141,14 @@ variable "ireland_tgw_asn" {
   }
 }
 
-variable "london_tgw_asn" {
-  description = "Amazon side ASN for Transit Gateway in London"
+variable "stockholm_tgw_asn" {
+  description = "Amazon side ASN for Transit Gateway in Stockholm"
   type        = number
   default     = 64515
 
   validation {
-    condition     = var.london_tgw_asn >= 64512 && var.london_tgw_asn <= 65534
-    error_message = "The london_tgw_asn must be between 64512 and 65534."
+    condition     = var.stockholm_tgw_asn >= 64512 && var.stockholm_tgw_asn <= 65534
+    error_message = "The stockholm_tgw_asn must be between 64512 and 65534."
   }
 }
 

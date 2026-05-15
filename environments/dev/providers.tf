@@ -43,11 +43,11 @@ provider "aws" {
 }
 
 # -----------------------------------------------------------------------------
-# Provider for London region (eu-west-2)
+# Provider for Stockholm region (eu-north-1)
 # -----------------------------------------------------------------------------
 provider "aws" {
-  alias  = "london"
-  region = var.london_region
+  alias  = "stockholm"
+  region = var.stockholm_region
 
   default_tags {
     tags = local.common_tags
