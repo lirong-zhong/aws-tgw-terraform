@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design adds 2 new regions (eu-west-1, eu-west-2) to create a 4-region full mesh Transit Gateway architecture with 6 peering connections.
+This design creates a 4-region full mesh Transit Gateway architecture with 6 peering connections across European AWS regions.
 
 ## Regions
 
@@ -11,7 +11,7 @@ This design adds 2 new regions (eu-west-1, eu-west-2) to create a 4-region full 
 | 1 | Paris | eu-west-3 | 10.1.0.0/16 | 64512 |
 | 2 | Frankfurt | eu-central-1 | 10.2.0.0/16 | 64513 |
 | 3 | Ireland | eu-west-1 | 10.3.0.0/16 | 64514 |
-| 4 | London | eu-west-2 | 10.4.0.0/16 | 64515 |
+| 4 | Stockholm | eu-north-1 | 10.4.0.0/16 | 64515 |
 
 ## Full Mesh Peering (6 Connections)
 
@@ -26,8 +26,8 @@ This design adds 2 new regions (eu-west-1, eu-west-2) to create a 4-region full 
                         /  │  \
                        /   │   \
     ┌─────────────┐   /    │    \   ┌─────────────┐
-    │    Paris    │──/─────┼─────\──│   London    │
-    │  eu-west-3  │ /      │      \ │  eu-west-2  │
+    │    Paris    │──/─────┼─────\──│  Stockholm  │
+    │  eu-west-3  │ /      │      \ │  eu-north-1 │
     │ 10.1.0.0/16 │/       │       \│ 10.4.0.0/16 │
     └──────┬──────┘        │        └──────┬──────┘
             \              │              /
@@ -58,10 +58,10 @@ This design adds 2 new regions (eu-west-1, eu-west-2) to create a 4-region full 
 |---|-----------|----------|-------|
 | 1 | Paris (eu-west-3) | Frankfurt (eu-central-1) | 10.1↔10.2 |
 | 2 | Paris (eu-west-3) | Ireland (eu-west-1) | 10.1↔10.3 |
-| 3 | Paris (eu-west-3) | London (eu-west-2) | 10.1↔10.4 |
+| 3 | Paris (eu-west-3) | Stockholm (eu-north-1) | 10.1↔10.4 |
 | 4 | Frankfurt (eu-central-1) | Ireland (eu-west-1) | 10.2↔10.3 |
-| 5 | Frankfurt (eu-central-1) | London (eu-west-2) | 10.2↔10.4 |
-| 6 | Ireland (eu-west-1) | London (eu-west-2) | 10.3↔10.4 |
+| 5 | Frankfurt (eu-central-1) | Stockholm (eu-north-1) | 10.2↔10.4 |
+| 6 | Ireland (eu-west-1) | Stockholm (eu-north-1) | 10.3↔10.4 |
 
 ## Resources Per Region
 
@@ -71,7 +71,12 @@ Each region will have:
 - 1 NAT Gateway
 - 1 Internet Gateway
 - Route tables with routes to all other 3 VPCs
-- 1 Test EC2 instance (optional)
+
+**Test EC2 Instances:**
+- Paris: Yes (for connectivity testing)
+- Frankfurt: Yes (for connectivity testing)
+- Ireland: No
+- Stockholm: No
 
 ## Route Table Configuration
 
@@ -80,19 +85,19 @@ Each TGW route table needs routes to 3 other VPCs:
 **Paris TGW Routes:**
 - 10.2.0.0/16 → Peering to Frankfurt
 - 10.3.0.0/16 → Peering to Ireland
-- 10.4.0.0/16 → Peering to London
+- 10.4.0.0/16 → Peering to Stockholm
 
 **Frankfurt TGW Routes:**
 - 10.1.0.0/16 → Peering to Paris
 - 10.3.0.0/16 → Peering to Ireland
-- 10.4.0.0/16 → Peering to London
+- 10.4.0.0/16 → Peering to Stockholm
 
 **Ireland TGW Routes:**
 - 10.1.0.0/16 → Peering to Paris
 - 10.2.0.0/16 → Peering to Frankfurt
-- 10.4.0.0/16 → Peering to London
+- 10.4.0.0/16 → Peering to Stockholm
 
-**London TGW Routes:**
+**Stockholm TGW Routes:**
 - 10.1.0.0/16 → Peering to Paris
 - 10.2.0.0/16 → Peering to Frankfurt
 - 10.3.0.0/16 → Peering to Ireland
@@ -105,24 +110,33 @@ Each TGW route table needs routes to 3 other VPCs:
 | TGW Peering Attachments | 6 | $36.50 | $219 |
 | NAT Gateway | 4 | $32.40 | $130 |
 | VPC Flow Logs | 4 | ~$10 | $40 |
-| **Total** | | | **~$535/month** |
+| Test EC2 Instances | 2 | ~$8 | $16 |
+| **Total** | | | **~$551/month** |
 
 *Note: Data transfer costs are additional*
 
-## Implementation Plan
+## Implementation Status
 
-1. Add 2 new providers (Ireland, London)
-2. Create 2 new VPCs with TGWs
-3. Create 4 new peering connections
-4. Update all route tables
-5. Create test instances
-6. Verify connectivity
+- [x] Add 2 new providers (Ireland, Stockholm)
+- [x] Create 2 new VPCs with TGWs
+- [x] Create 5 new peering connections (total 6)
+- [x] Update all route tables
+- [x] Test instances in Paris and Frankfurt only
+- [ ] Deploy and verify connectivity
 
-## Questions for Confirmation
+## Deployment
 
-1. Are the CIDR blocks (10.1-10.4.0.0/16) acceptable?
-2. Do you need test EC2 instances in all 4 regions?
-3. Should we use single NAT Gateway (cost saving) or HA (one per AZ)?
-4. Any specific naming convention required?
+```bash
+cd environments/dev
+terraform plan
+terraform apply
+```
 
-**Please confirm this design to proceed with implementation.**
+## Files
+
+| File | Description |
+|------|-------------|
+| `main.tf` | Paris and Frankfurt VPCs, TGWs, and peering |
+| `main-4region.tf` | Ireland and Stockholm VPCs, TGWs, and 5 new peerings |
+| `outputs.tf` | Outputs for Paris and Frankfurt |
+| `outputs-4region.tf` | Outputs for Ireland and Stockholm |
