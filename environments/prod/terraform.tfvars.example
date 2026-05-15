@@ -1,0 +1,62 @@
+# =============================================================================
+# Terraform Variables - Dev Environment
+# =============================================================================
+# Copy this file to terraform.tfvars and update with your values
+# IMPORTANT: Never commit terraform.tfvars to version control
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# AWS Account Configuration
+# -----------------------------------------------------------------------------
+
+# Your AWS Account ID (12 digits, no dashes)
+aws_account_id = "135808925467"
+
+# -----------------------------------------------------------------------------
+# Region Configuration
+# -----------------------------------------------------------------------------
+
+paris_region     = "eu-west-3"
+frankfurt_region = "eu-central-1"
+
+# -----------------------------------------------------------------------------
+# Network Configuration
+# -----------------------------------------------------------------------------
+
+# VPC CIDR blocks - ensure they don't overlap
+paris_vpc_cidr     = "10.1.0.0/16"
+frankfurt_vpc_cidr = "10.2.0.0/16"
+
+# -----------------------------------------------------------------------------
+# Transit Gateway Configuration
+# -----------------------------------------------------------------------------
+
+# ASN must be unique per TGW (range: 64512-65534)
+paris_tgw_asn     = 64512
+frankfurt_tgw_asn = 64513
+
+# -----------------------------------------------------------------------------
+# EC2 Test Instance Configuration
+# -----------------------------------------------------------------------------
+
+instance_type         = "t3.micro"
+create_test_instances = true
+
+# -----------------------------------------------------------------------------
+# Feature Flags
+# -----------------------------------------------------------------------------
+
+# Enable VPC Flow Logs for network monitoring
+enable_flow_logs = true
+
+# Use single NAT Gateway (cost savings for dev/test)
+# Set to false for production (one NAT per AZ)
+single_nat_gateway = true
+
+# -----------------------------------------------------------------------------
+# Project Configuration
+# -----------------------------------------------------------------------------
+
+project_name = "tgw-multi-region"
+environment  = "dev"
+owner        = "DevOps Team"
